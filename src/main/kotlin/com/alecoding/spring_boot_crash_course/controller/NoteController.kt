@@ -3,7 +3,9 @@ package com.alecoding.spring_boot_crash_course.controller
 import com.alecoding.spring_boot_crash_course.database.model.Note
 import com.alecoding.spring_boot_crash_course.database.repository.NoteRepository
 import org.bson.types.ObjectId
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -14,6 +16,7 @@ import kotlin.text.toHexString
 
 // POST https://localhost:8085/notes
 // GET https://localhost:8085/notes?ownerId=123
+// DELETE https://localhost:8085/notes/123
 
 @RestController
 @RequestMapping("/notes")
@@ -25,8 +28,7 @@ class NoteController (
         val id: String?,
         val title: String,
         val content: String,
-        val color: Long,
-        val ownerId: String
+        val color: Long
     )
 
     data class NoteResponse(
@@ -37,7 +39,7 @@ class NoteController (
         val createdAt: Instant
     )
 
-    @PostMapping("/note/{id}")
+    @PostMapping
     fun save(
         @RequestBody body: NoteRequest
     ): NoteResponse {
@@ -62,6 +64,11 @@ class NoteController (
         return repository.findByOwnerId(ObjectId(ownerId)).map {
             it.toResponse()
         }
+    }
+
+    @DeleteMapping(path = ["/{id}"])
+    fun deleteById(@PathVariable id: String) {
+        repository.deleteById(ObjectId((id)))
     }
 
     private fun Note.toResponse(): NoteController.NoteResponse {
